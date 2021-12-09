@@ -106,6 +106,17 @@ UserSchema.statics.findMovies = async function (id) {
   return movies
 }
 
+UserSchema.statics.addMovieInFavorite = async function (username, movieId) {
+  const response = await this.updateOne({ username: username }, { $push: { favorite: movieId } })
+  return response
+}
+
+UserSchema.statics.removeMovieInFavorite = async function (username, movieId) {
+  const response = await this.updateOne({ username: username }, { $pull: { favorite: movieId } })
+  console.log(response)
+  return response
+}
+
 const User = mongoose.model('User', UserSchema, 'user')
 
 module.exports = { User }

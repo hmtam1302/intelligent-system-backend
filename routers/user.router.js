@@ -133,15 +133,39 @@ router.post('/movie/get', async (req, res) => {
   const ids = req.body.ids
   const movies = await User.findMovies(ids);
   if (movies === null) {
-    res.status(200).send('No results found!')
+    res.status(400).send('No results found!')
   } else {
     console.log('---- Success ----')
     res.status(200).send(movies)
   }
 })
 
-router.get('/test', async (req, res) => {
+// Add favorite movie
+router.post('/movie/like', async (req, res) => {
+  console.log('==== Add new movie to favorite list ====')
+  const username = req.body.username
+  const movieId = req.body.movieId  //String
+  const response = await User.addMovieInFavorite(username, movieId);
+  if (response) {
+    console.log('---- Success ----')
+    res.status(200).send('Success')
+  } else {
+    res.status(400).send('Something went wrong !')
+  }
+})
 
+// Remove favorite movie
+router.post('/movie/dislike', async (req, res) => {
+  console.log('==== Remove movie to favorite list ====')
+  const username = req.body.username
+  const movieId = req.body.movieId  //String
+  const response = await User.removeMovieInFavorite(username, movieId);
+  if (response) {
+    console.log('---- Success ----')
+    res.status(200).send('Success')
+  } else {
+    res.status(400).send('Something went wrong !')
+  }
 })
 
 module.exports = router
