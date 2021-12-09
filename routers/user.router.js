@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { User } = require('../models/user.model');
+const { spawn } = require('child_process');
 
 //Login
 router.post('/login', async (req, res) => {
@@ -77,20 +78,70 @@ router.post('/movie', async (req, res) => {
   }
 })
 
-// Update apriori argument
-router.post('/apriori/argument', async (req, res) => {
-  console.log('==== Update apriori argument ====');
-  const id = req.body.id;
-  const support = req.body.support;
-  const confidence = req.body.confidence;
-  const response = await User.updateApriori(id, support, confidence);
-  if (response === true) {
+/// Get apriori arguments
+router.get('/apriori/argument/:id', async (req, res) => {
+  console.log('==== Get apriori arguments ====')
+  const id = req.params.id
+  const response = await User.getApriori(id)
+  if (response === null) {
+    res.status(400).send('Invalid user!');
+  } else {
     console.log('---- Success ----');
-    res.send(200).send('Success');
-  }
-  else {
-    res.send(400).send('Invalid apriori argument');
+    res.status(200).send(response);
   }
 })
 
-module.exports = router;
+// Update apriori arguments
+router.post('/apriori/argument', async (req, res) => {
+  console.log('==== Update apriori arguments ====')
+  const id = req.body.id
+  const support = req.body.support
+  const confidence = req.body.confidence
+  const response = await User.updateApriori(id, support, confidence)
+  if (response === true) {
+    console.log('---- Success ----')
+    res.send(200).send('Success')
+  } else {
+    res.send(400).send('Invalid apriori argument')
+  }
+})
+
+// Get associate rules
+router.post('/apriori/recommend', async (req, res) => {
+  console.log('==== Get recommend movie by apriori algorithm ====')
+  const id = req.body.username
+  const movieId = req.body.movieId
+
+  const user = await User.getUser(id)
+
+  let minSupport = user.support
+  let minConfidence = user.confidence
+  let result = ''
+  const process = await spawn('python', ['./utils/associate_rule_mining.py', minSupport, minConfidence, movieId])
+  await process.stdout.on('data', function (data) {
+    result += data.toString()
+    result = result.substring(result.indexOf("[") + 1, result.indexOf("]"))
+    result = result.split(",").map(item => item.trim())
+    console.log('---- Success ----')
+    res.status(200).send(result)
+  })
+})
+
+// Get info of movies
+router.post('/movie/get', async (req, res) => {
+  console.log('==== Get movie info by id ====')
+  const ids = req.body.ids
+  const movies = await User.findMovies(ids);
+  if (movies === null) {
+    res.status(200).send('No results found!')
+  } else {
+    console.log('---- Success ----')
+    res.status(200).send(movies)
+  }
+})
+
+router.get('/test', async (req, res) => {
+
+})
+
+module.exports = router

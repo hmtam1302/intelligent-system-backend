@@ -6,14 +6,19 @@ const movieSchema = new mongoose.Schema({
     genres: { type: String, required: true }
 })
 
-movieSchema.statics.getMovie = async function(name) {
+movieSchema.statics.getMovie = async function (name) {
     const movies = await this.find({
         title: { $regex: name, $options: 'i' }
     });
     return movies;
 }
 
-movieSchema.statics.getMovieByTheme = async function(theme) {
+movieSchema.statics.findMovies = async function (id) {
+    const movies = await this.find({ movieId: { $in: id } });
+    return movies;
+}
+
+movieSchema.statics.getMovieByTheme = async function (theme) {
     const movies = await this.find({
         genres: { $regex: theme, $options: 'i' }
     }).limit(10);
