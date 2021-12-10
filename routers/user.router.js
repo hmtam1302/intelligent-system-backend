@@ -100,25 +100,28 @@ router.post('/apriori/argument', async (req, res) => {
   const response = await User.updateApriori(id, support, confidence)
   if (response === true) {
     console.log('---- Success ----')
-    res.send(200).send('Success')
+    res.status(200).send('Success')
   } else {
-    res.send(400).send('Invalid apriori argument')
+    res.status(400).send('Invalid apriori argument')
   }
 })
 
 // Get associate rules
 router.post('/apriori/recommend', async (req, res) => {
   console.log('==== Get recommend movie by apriori algorithm ====')
-  const id = req.body.username
+  const username = req.body.username
   const movieId = req.body.movieId
 
-  const user = await User.getUser(id)
+  const user = await User.getUser(username)
 
   let minSupport = user.support
   let minConfidence = user.confidence
   let result = ''
-  const process = await spawn('python', ['./utils/associate_rule_mining.py', minSupport, minConfidence, movieId])
-  await process.stdout.on('data', function (data) {
+  setTimeout(() => {
+    res.status(200).send([])
+  }, 1000*2);
+  const process = spawn('python', ['./utils/associate_rule_mining.py', minSupport, minConfidence, movieId])
+  process.stdout.on('data', function (data) {
     result += data.toString()
     result = result.substring(result.indexOf("[") + 1, result.indexOf("]"))
     result = result.split(",").map(item => item.trim())
