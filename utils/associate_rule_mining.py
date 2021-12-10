@@ -1,12 +1,11 @@
 # Preperation
 from itertools import combinations
-from mlxtend.frequent_patterns import apriori
 import pandas as pd
 import numpy as np
 import sys
 
-support = float(sys.argv[1])
-confidence = float(sys.argv[2])
+support = 0.2 #float(sys.argv[1])
+confidence = 0.25 #float(sys.argv[2])
 movieId = int(sys.argv[3])
 
 ratings = pd.read_csv('./utils/ratings.csv')
