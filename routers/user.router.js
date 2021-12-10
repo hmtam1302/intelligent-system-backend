@@ -119,7 +119,7 @@ router.post('/apriori/recommend', async (req, res) => {
   let result = ''
   setTimeout(() => {
     res.status(200).send([])
-  }, 1000*2);
+  }, 1000*20);
   const process = spawn('python', ['./utils/associate_rule_mining.py', minSupport, minConfidence, movieId])
   process.stdout.on('data', function (data) {
     result += data.toString()
